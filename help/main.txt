@@ -1,0 +1,8 @@
+This is the test bot that uses trollbox-interface.
+The commands are color, name, room, who, whotable, whotableascii, help, info, and status.
+Anybody with the same home as the bot can run block, circuitblock, unblock, and circuitunblock.
+
+This file should be in the help/ folder.
+You can create other files (name).txt in this folder, and the help command can be used like:
+help (name)
+this way you can update your help pages and have multiple of them.

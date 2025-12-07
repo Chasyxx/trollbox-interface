@@ -1,0 +1,7 @@
+This is the test bot that uses trollbox-interface.
+It's expected to be edited in order to be an actual bot, but it comes with some basic commands already.
+
+This file should be in the info/ folder.
+You can create other files (name).txt in this folder, and the info command can be used like:
+info (name)
+this way you can update your info pages and have multiple of them.
