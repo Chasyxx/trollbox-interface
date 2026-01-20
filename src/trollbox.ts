@@ -105,7 +105,7 @@ export function getUser(identifier1: string, identifier2?: string, excludeSelf?:
 export function* getUsersLax(identifier: string) {
     for(const user of getAllUsers()) {
         if(identifier===user.sid) yield user;
-        if(identifier===user.home) yield user;
+        if(identifier===user.home||identifier===user.home.slice(0,8)) yield user;
         if(deunicode(user.name).toLowerCase().includes(deunicode(identifier).toLowerCase())) yield user;
     }
 }
@@ -115,22 +115,6 @@ export function* getUsersStrict(identifier: string) {
         if(identifier===user.sid) yield user;
         if(identifier===user.home) yield user;
         if(identifier===user.name) yield user;
-    }
-}
-
-export function* getUsersStrict2(identifier1: string, identifier2: string) {
-    for(const user of getAllUsers()) {
-        let a = false;
-        let b = false;
-        if(identifier1===user.sid) a = true;
-        if(identifier1===user.home) a = true;
-        if(identifier1===user.name) a = true;
-
-        if(identifier2===user.sid) b = true;
-        if(identifier2===user.home) b = true;
-        if(identifier2===user.name) b = true;
-
-        if(a&&b) yield user;
     }
 }
 

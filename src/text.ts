@@ -12,12 +12,6 @@ export function fit(str: string, len: number) {
     return str;
 }
 
-export type filteredTerm = {
-    filterName: string,
-    term: string,
-    replacement?: string
-}
-
 export function unhide(x: string) {
     let o = x.replace(/\u200b/g,"[ZWSP]").replace(/\u200c/g,"[ZWNJ]")
             .replace(/\u200d/g,"[ZWJ]").replace(/\u2007/g,"[FSP]")

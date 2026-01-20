@@ -3,8 +3,15 @@ This is a template for creating bots for the WINDOWS93 trollbox.
 It's based off of my Tayo/WDICI/IDKWTCI/Protropitous bot.
 It's pretty similar to trollbox-bot, except I mostly made this from scratch and it's more refined than trb.
 
+> [!TIP]
+>
+> This is meant to be a basic template bot you can edit into your own bot, so it's very minimal. It already comes with a ban list, but you may awnt to add ban reasons, an admin list, or censors.
+
 ## Running the bot!
 Scroll down for the Linux guide if you're using that.
+> [!WARNING]
+>
+> `node main.js` is expected to be ran with the working directory as `target`. Running it with any other working directory may cause files to be created in unwanted spots.
 
 ### Windows
 You first need to install [Node.JS](https://nodejs.org/en/download).
