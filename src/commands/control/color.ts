@@ -13,6 +13,7 @@ export function execute(args: string[]): string {
     if(!(/#?([1234567890abcdef]{3}|[1234567890abcdef]{4}|[1234567890abcdef]{6}|[1234567890abcdef]{8})/i.test(color))) {
         return "Only valid hex colors, please";
     }
+    if(color.includes("272822")) return "Nice try...";
     if(!color.startsWith("#")) color = "#"+color;
     setColor(color);
     return `Color change to ${color}`;

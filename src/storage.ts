@@ -13,12 +13,12 @@ export class Storage<storageType = never> {
             try {
                 this.val = JSON.parse(readFileSync("../storage/"+this.file+".json", { encoding: "utf8" }));
                 console.log("Loaded storage file",this.file);
+                this.save();
             } catch(error) {
                 console.warn("Couldn't load setstorage file",this.file,error);
                 this.val = init;
             }
         } else this.val = init;
-        this.save();
     }
 
     set(value: storageType) {
@@ -52,12 +52,12 @@ export class SetStorage<storageType = never> {
             try {
                 this.set = new Set(JSON.parse(readFileSync("../storage/"+this.file+".json", { encoding: "utf8" })));
                 console.log("Loaded setstorage file",this.file);
+                this.save();
             } catch(error) {
                 console.warn("Couldn't load setstorage file",this.file,error);
                 this.set = new Set();
             }
         } else this.set = new Set();
-        this.save();
     }
 
     add(value: storageType) {
@@ -117,12 +117,12 @@ export class MapStorage<keyType, valueType> {
             try {
                 this.map = new Map(JSON.parse(readFileSync("../storage/"+this.file+".json", { encoding: "utf8" })));
                 console.log("Loaded mapstorage file",this.file);
+                this.save();
             } catch(error) {
                 console.warn("Couldn't load mapstorage file",this.file,error);
                 this.map = new Map();
             }
         } else this.map = new Map();
-        this.save();
     }
 
     set(k: keyType, v: valueType) {
