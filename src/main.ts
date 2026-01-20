@@ -2,12 +2,16 @@ import { commands } from "./commands";
 import { cooldown } from "./cooldown";
 import { deunicode } from "./text";
 import { initInterface, eventEmitter, queueMessage, setName, setColor, currentName, 
-    setPrefix, interfaceMessage, home, interfaceUser, sid } from "./interface";
+    setPrefix, interfaceMessage, home, sid, room } from "./interface";
 import { getAllUsers, getUser, UserStatus } from "./trollbox";
 
 setName("test bot [!]");
 setColor("yellow");
 setPrefix("!");
+
+eventEmitter.on("ready",()=>{
+    queueMessage("Congratulations! The bot framework is working correctly.");
+});
 
 const shadowNames = [
     "test1 [!]",
@@ -27,7 +31,7 @@ function handleShadowspam() {
         const cursor = "|/-\\!"[idx % 5 | 0];
         const cursor2 = "|!\\-~/A"[idx / 2 % 7 | 0];
         const cursor3 = "|!/ZA-~=S\\Y"[idx / 3 % 11 | 0];
-        setName(`${cursor}${cursor2}${cursor3}Tayo[%]`);
+        setName(`${cursor}${cursor2}${cursor3}bot`);
     } else setName(name);
     if(Math.random()<0.1&&shadowspams>0) shadowspams--;
     else shadowspams++;
@@ -50,6 +54,7 @@ eventEmitter.on("command", async function onCommand(commandArgs: string[], messa
     if (command === undefined) return;
 
     const module = command.module;
+    const power = user.status === UserStatus.operator;
     if (module.operatorOnly) {
         if (user.status === UserStatus.bot || user.status === UserStatus.blocked) return;
         if (user.status !== UserStatus.operator) {
@@ -66,13 +71,13 @@ eventEmitter.on("command", async function onCommand(commandArgs: string[], messa
             if (!cooldown("unsafeCommand", 10)) return;
         }
     }
-
+    if(module.denyInAtrium && room === "atrium" && !power) {
+        if(cooldown("notinatrium",60)) queueMessage("You can't use this in atrium!\nUse %room to move the bot elsewhere in order to use this.");
+        return;
+    }
+    const name = module.name??(module.names??[])[0];
     const output = await module.execute(commandArgs.slice(1), messageData, user);
     if (output) queueMessage(output);
 });
-
-eventEmitter.on("ready",()=>{
-    queueMessage("Congratulations! The bot framework is working correctly.");
-})
 
 initInterface();

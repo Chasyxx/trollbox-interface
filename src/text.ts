@@ -18,6 +18,28 @@ export type filteredTerm = {
     replacement?: string
 }
 
+export function unhide(x: string) {
+    let o = x.replace(/\u200b/g,"[ZWSP]").replace(/\u200c/g,"[ZWNJ]")
+            .replace(/\u200d/g,"[ZWJ]").replace(/\u2007/g,"[FSP]")
+            .replace(/\u061c/g,"[ALM]").replace(/\u180B/g,"[FVS1]")
+            .replace(/\u2062/g,"[INVS]").replace(/\ufeff/g,"[BOM]")
+            .replace(/\u3164/g,"[HF]").replace(/\uffa0/g,"[HWHF]")
+            .replace(/\u034f/g,"[CGJ]")
+        
+            .replace(/\u202d/ig,"\u202d[LRO]").replace(/\u202e/ig,"\u202d[RLO]\u202e")
+            .replace(/\u200e/ig,"\u202d[LRM]").replace(/\u200f/ig,"\u202d[RLM]\u200f")
+            .replace(/\u202a/ig,"\u202d[LRE]").replace(/\u202b/ig,"\u202d[RLE]\u202b")
+            .replace(/\u2066/ig,"\u202d[LRI]").replace(/\u2067/ig,"\u202d[RLI]\u2067");
+    for(let i = 0; i < 16; i++) {
+        const char = String.fromCodePoint(0xFE00+i);
+        o=o.replace(new RegExp(char, 'g'), `${char}[${i+1}]`);
+    }
+    for(let i = 0; i < 240; i++) {
+        const char = String.fromCodePoint(0xE0100+i);
+        o=o.replace(new RegExp(char, 'g'), `${char}[${i+17}]`);
+    }
+    return o;
+}
 export function splitMultis(str: string): string {
     let out = "";
     for (let i = 0; i < str.length; i++) {
@@ -41,6 +63,6 @@ export function wrapChars(str: string): string {
     return out;
 }
 export function deunicode(str: string): string {
-    return wrapChars(splitMultis(str));
+    return wrapChars(splitMultis(unhide(str))).replace(/~/g,'#');
 }
 

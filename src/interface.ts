@@ -6,6 +6,8 @@ import { decode as hDecode } from "he"
 
 import { EventEmitter } from "node:events";
 
+import cooldown from "./cooldown";
+
 export { }
 
 export let isReady = false;
@@ -30,6 +32,12 @@ export let name = "beepboop";
 export function setName(val: string) { name = val; }
 export let color = "red";
 export function setColor(val: string) { color = val; }
+export let room = "atrium";
+export function setRoom(val: string) { 
+    room = val;
+    //@ts-ignore - socket.io SUCKS
+    socket.emit('message',`/room ${room}`);
+}
 export let prefix = "!";
 export function setPrefix(val: string) { prefix = val; }
 export let currentName = name;
@@ -128,21 +136,25 @@ function loop() {
         return;
     };
     if ((currentColor !== (color + watermark) && currentColor !== color) || currentName !== name) {
-        if (identAttemps < 2) {
+        if (identAttemps < 3) {
             identAttemps++;
-            console.log("+++ Changing identity");
+            console.log("+++ Changing identity",identAttemps);
             console.log("Currently", currentColor, currentName);
             console.log("Expected", (color + watermark), name);
             console.log("Or", color, name);
             console.log("---");
-            setTimeout(function () { sendUserInfo() }, 1000);
-            setTimeout(function () { loop() }, 2000);
+            setTimeout(function () { sendUserInfo(name, color) }, 750);
+            setTimeout(function () { loop() }, 1500);
             return;
         }
         identAttemps = 0;
+        // if(shadowspammer.isShadowspamming()) {
+        //     console.log("XXX Failiure to change identity - Aborting shadowspam!");
+        //     end();
+        // } else {
+        console.log("Assuming identity has already changed");
         currentColor = color;
         currentName = name;
-        console.log("Assuming identity has already changed");
     }
     try {
         eventEmitter.emit("tick");
@@ -168,20 +180,18 @@ function loop() {
     }
 }
 
-let lastSendUserInfo = 0;
-function sendUserInfo(): boolean {
+export function sendUserInfo(directName?: string, directColor?: string): boolean {
     //@ts-ignore - this version of socket.io sucks for typescript
     if (!(socket?.connected)) {
         console.warn("Tried to send user info while disconnected");
         return false;
     }
-    const dn = Date.now();
-    if (dn < (lastSendUserInfo + 3000)) {
-        console.warn("User info is being sent way too quick");
+    if(!cooldown('sendUserInfo', 1.4)) {
+        console.warn("Tried to send user info way too quickly");
         return false;
     }
     //@ts-ignore - this version of socket.io sucks for typescript
-    socket.emit('user joined', name, color + watermark, style, pass);
+    socket.emit('user joined', directName ?? name, (directColor ?? color) + watermark, style, pass);
     return true;
 }
 
@@ -199,8 +209,8 @@ function prepareSocket() {
             //@ts-ignore - this version of socket.io sucks for typescript
             if (userSID === sid) {
                 home = user.home;
-                currentName = user.nick;
-                currentColor = user.color;
+                currentName = hDecode(user.nick);
+                currentColor = hDecode(user.color);
                 identAttemps = 0;
             }
             connectedUsers.push(convertTrollboxUserToInterfaceUser(user, userSID));
@@ -275,9 +285,9 @@ function connect() {
         console.log("Succesfully connected, sending user info");
         //@ts-ignore - this version of socket.io sucks for typescript
         sid = socket.id;
-        lastSendUserInfo = 0;
         currentName = name;
         currentColor = color;
+        room = "atrium";
         function attempt(): void {
             if (sendUserInfo()) ready();
             else {

@@ -4,6 +4,8 @@ import { deunicode } from "./text";
 
 import { blockedUsers } from "./storage";
 
+console.log("Module START - trollbox");
+
 export enum UserStatus {
     /** The user does not exist. */
     nobody = "nobody",
@@ -24,8 +26,9 @@ export enum UserStatus {
 
 export type User = { sid: string, home: string, name: string, color: string, style: "", room: string, status: UserStatus };
 
-function getStatus(u: interfaceUser | null): UserStatus {
+export function getStatus(u: interfaceUser | null): UserStatus {
     if(u === null) return UserStatus.nobody;
+    if(u.home==="trollbox") return UserStatus.nobody;
     if(u.home===home) return UserStatus.operator;
     if(blockedUsers.has(u.home)) return UserStatus.blocked;
     if(u.isBot) return UserStatus.bot;
@@ -74,17 +77,19 @@ export function getUser(identifier1: string, identifier2?: string, excludeSelf?:
          
 
         if(identifier1===user.home) match1strict = true;
+        if(identifier1===user.home.slice(0,8)) match1lax = true;
         if(identifier1===user.name) match1strict = true;
         if(deunicode(user.name).toLowerCase().includes(deunicode(identifier1).toLowerCase())) match1lax = true;
 
         if(identifier2===user.home) match2strict = true;
         if(identifier2===user.name) match2strict = true;
+        if(identifier2===user.home.slice(0,8)) match2lax = true;
         if(identifier2 && deunicode(user.name).toLowerCase().includes(deunicode(identifier2).toLowerCase())) match2lax = true;
 
 
         if(identifier2) {
             if(match1strict&&match2strict) return user;
-            if((match1strict&&match2lax)||(match2strict&&match1lax)) {
+            if(match1strict&&match2lax||match2strict&&match1lax) {
                 strict = user;
             } else if(match1lax&&match2lax) {
                 lax = user;
@@ -96,3 +101,47 @@ export function getUser(identifier1: string, identifier2?: string, excludeSelf?:
     }
     return strict??lax;
 }
+
+export function* getUsersLax(identifier: string) {
+    for(const user of getAllUsers()) {
+        if(identifier===user.sid) yield user;
+        if(identifier===user.home) yield user;
+        if(deunicode(user.name).toLowerCase().includes(deunicode(identifier).toLowerCase())) yield user;
+    }
+}
+
+export function* getUsersStrict(identifier: string) {
+    for(const user of getAllUsers()) {
+        if(identifier===user.sid) yield user;
+        if(identifier===user.home) yield user;
+        if(identifier===user.name) yield user;
+    }
+}
+
+export function* getUsersStrict2(identifier1: string, identifier2: string) {
+    for(const user of getAllUsers()) {
+        let a = false;
+        let b = false;
+        if(identifier1===user.sid) a = true;
+        if(identifier1===user.home) a = true;
+        if(identifier1===user.name) a = true;
+
+        if(identifier2===user.sid) b = true;
+        if(identifier2===user.home) b = true;
+        if(identifier2===user.name) b = true;
+
+        if(a&&b) yield user;
+    }
+}
+
+export function* getUsersInRoom(room: string, includeBlocked = false) {
+    for(const user of getAllUsers()) {
+        if(!includeBlocked)
+        if(user.room===room) yield user;
+    }
+}
+export function getHandle(home: string, replacement?: string): string {
+    return getUser(home, undefined, true)?.name??replacement??home.slice(0,8);
+}
+
+console.log("Module END - trollbox");
